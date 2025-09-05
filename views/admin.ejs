@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <h1>Kelola Nomor</h1>
+
+  <form action="/admin/add" method="POST">
+    <input type="text" name="nomor" placeholder="Tambah nomor" required>
+    <button type="submit">Tambah</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nomor</th>
+        <th>Status</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="data-body">
+      <% data.forEach(item => { %>
+        <tr>
+          <td><%= item.nomor %></td>
+          <td><%= item.status %></td>
+          <td>
+            <form action="/admin/delete" method="POST" style="display:inline">
+              <input type="hidden" name="nomor" value="<%= item.nomor %>">
+              <button type="submit">Hapus</button>
+            </form>
+            <form action="/admin/block" method="POST" style="display:inline">
+              <input type="hidden" name="nomor" value="<%= item.nomor %>">
+              <button type="submit">Blokir</button>
+            </form>
+            <form action="/admin/edit" method="POST" style="display:inline">
+              <input type="hidden" name="oldNomor" value="<%= item.nomor %>">
+              <input type="text" name="newNomor" placeholder="Nomor baru" required>
+              <button type="submit">Ubah</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <script>
+    const evtSource = new EventSource("/events");
+    evtSource.onmessage = function(event) {
+      const data = JSON.parse(event.data);
+      const tbody = document.getElementById("data-body");
+      tbody.innerHTML = "";
+      data.forEach(item => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${item.nomor}</td>
+            <td>${item.status}</td>
+            <td>
+              <form action="/admin/delete" method="POST" style="display:inline">
+                <input type="hidden" name="nomor" value="${item.nomor}">
+                <button type="submit">Hapus</button>
+              </form>
+              <form action="/admin/block" method="POST" style="display:inline">
+                <input type="hidden" name="nomor" value="${item.nomor}">
+                <button type="submit">Blokir</button>
+              </form>
+              <form action="/admin/edit" method="POST" style="display:inline">
+                <input type="hidden" name="oldNomor" value="${item.nomor}">
+                <input type="text" name="newNomor" placeholder="Nomor baru" required>
+                <button type="submit">Ubah</button>
+              </form>
+            </td>
+          </tr>`;
+      });
+    };
+  </script>
+</body>
+</html>
